@@ -5,8 +5,8 @@ sem balanceamento usada como linha de base experimental.
 
 ## Equipe
 
-- Marcos Queiroz
-- Rafael Nunes
+- Marcus Querol
+- Raphael Nunes
 - Grupo 16
 
 ## Parametros do grupo 16
