@@ -2,7 +2,7 @@ import unittest
 from bisect import bisect_left
 from random import Random
 
-from avl_aumentada import (
+from codigo.avl_aumentada import (
     Node,
     balance_factor,
     delete,

@@ -96,7 +96,11 @@ def main() -> int:
         default=Path("data/osm_cellids_800M_uint64"),
     )
     parser.add_argument("--workloads", type=Path, default=Path("workloads"))
-    parser.add_argument("--results", type=Path, default=Path("resultados.csv"))
+    parser.add_argument(
+        "--results",
+        type=Path,
+        default=Path("resultados/resultados.csv"),
+    )
     parser.add_argument("--repetitions", type=int, default=3)
     parser.add_argument("--extra-queries", type=int, default=500)
     parser.add_argument(
@@ -135,7 +139,8 @@ def main() -> int:
             run(
                 [
                     sys.executable,
-                    "gen_workload.py",
+                    "-m",
+                    "codigo.gen_workload",
                     "generate",
                     "--keys",
                     str(args.data),
@@ -168,7 +173,8 @@ def main() -> int:
                 run(
                     [
                         sys.executable,
-                        "benchmark.py",
+                        "-m",
+                        "codigo.benchmark",
                         str(trace_path),
                         "--structure",
                         structure,

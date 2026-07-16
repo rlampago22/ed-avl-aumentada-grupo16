@@ -4,7 +4,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from avl_aumentada import Node, delete, insert, search, validate_invariants
+from codigo.avl_aumentada import Node, delete, insert, search, validate_invariants
 
 
 def execute_trace(

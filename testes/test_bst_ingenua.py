@@ -1,6 +1,6 @@
 import unittest
 
-import bst_ingenua as bst
+from codigo import bst_ingenua as bst
 
 
 class NaiveBstTests(unittest.TestCase):

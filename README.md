@@ -20,18 +20,13 @@ sem balanceamento usada como linha de base experimental.
 
 ## Organizacao
 
-- `avl_aumentada.py`: AVL, rotacoes e operacoes obrigatorias.
-- `bst_ingenua.py`: BST sem balanceamento usada como linha de base.
-- `executar_trace.py`: executa arquivos `.trace` e produz respostas de busca.
-- `gen_workload.py`: gerador e oraculo fornecido pelo professor.
-- `benchmark.py`: mede media, p50 e p99 por operacao.
-- `rodar_experimentos.py`: executa os cenarios reproduziveis do grupo 16.
-- `gerar_graficos.py`: valida o CSV final e gera as quatro figuras do relatorio.
-- `test_*.py`: testes unitarios, de invariantes e diferenciais.
+- `codigo/`: AVL, BST, gerador, executor e ferramentas de experimento.
+- `testes/`: testes unitarios, de invariantes e diferenciais.
+- `resultados/`: CSV final com as 66 execucoes da matriz experimental.
+- `graficos/`: quatro figuras do relatorio e o script que as gera.
 
-O conjunto OSM, os traces e os resultados intermediarios sao gerados
-localmente e nao sao versionados. Os resultados finais usados no relatorio
-serao preservados separadamente quando a matriz experimental estiver concluida.
+O conjunto OSM, os traces e os resultados intermediarios ficam apenas na
+maquina local por causa do tamanho. O CSV final e os graficos sao versionados.
 
 ## Campos de cada no AVL
 
@@ -74,25 +69,12 @@ O desenvolvimento atual usa Python 3.14 e NumPy 2.5.1.
 ## Testes
 
 ```powershell
-python -m unittest -v
+python -m unittest discover -s testes -v
 ```
 
 Os testes cobrem metadados, quatro casos de rotacao, insercao, remocao,
 busca, rank, select, soma em intervalo, leitura de trace e comparacao
 aleatoria com estruturas de referencia do Python.
-
-## Colaboracao
-
-A branch `main` deve conter apenas versoes funcionais. Para alteracoes maiores:
-
-1. Atualize sua copia local da `main`.
-2. Crie uma branch curta e descritiva, como `rafael/revisao-relatorio`.
-3. Faca commits pequenos, com mensagens que expliquem a mudanca.
-4. Abra um pull request e peca a revisao da dupla antes de integrar.
-
-Antes de enviar uma alteracao, execute `python -m unittest -v`. Nunca adicione
-o arquivo OSM ao Git: ele possui 6,4 GB e pode ser obtido pela fonte indicada
-abaixo.
 
 ## Dados OSM
 
@@ -118,15 +100,15 @@ Valor esperado: `70670BF41196B9591E07D0128A281B9A`.
 Exemplo pequeno com a configuracao principal do grupo:
 
 ```powershell
-python gen_workload.py generate `
+python -m codigo.gen_workload generate `
   --keys "data\osm_cellids_800M_uint64" --format sosd --key-bytes 8 `
   --max-load 20000 --out osm_pilot `
   --ops 20000 --universe 10000 `
   --mix 35:30:35 --theta 0.6 --insert-order shuffle --seed 16
 
-python executar_trace.py osm_pilot.trace osm_pilot.out --validate-every 1000
+python -m codigo.executar_trace osm_pilot.trace osm_pilot.out --validate-every 1000
 
-python gen_workload.py verify `
+python -m codigo.gen_workload verify `
   --expected osm_pilot.expected --candidate osm_pilot.out
 ```
 
@@ -139,17 +121,18 @@ real proximo de `35:30:35`.
 Piloto:
 
 ```powershell
-python rodar_experimentos.py --suite pilot --repetitions 1 `
-  --results resultados_pilot.csv --reset-results
+python -m codigo.rodar_experimentos --suite pilot --repetitions 1 `
+  --results resultados/resultados_pilot.csv --reset-results
 ```
 
 Matriz completa:
 
 ```powershell
-python rodar_experimentos.py --suite full --repetitions 3 `
-  --results resultados.csv --reset-results
+python -m codigo.rodar_experimentos --suite full --repetitions 3 `
+  --results resultados/resultados.csv --reset-results
 
-python gerar_graficos.py --results resultados.csv --output graficos
+python graficos/gerar_graficos.py `
+  --results resultados/resultados.csv --output graficos
 ```
 
 A matriz completa mede cinco escalas entre `10^2` e `10^6`, os thetas
@@ -158,4 +141,3 @@ com BST. Os resultados incluem insercao, remocao, busca, rank, select,
 range, altura final e quantidade de rotacoes. O ultimo comando valida as 66
 execucoes esperadas e produz quatro graficos a partir da mediana das tres
 repeticoes de cada cenario.
-

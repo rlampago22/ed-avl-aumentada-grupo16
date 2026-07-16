@@ -7,8 +7,8 @@ from array import array
 from pathlib import Path
 from time import perf_counter_ns
 
-import avl_aumentada as avl
-import bst_ingenua as bst
+from codigo import avl_aumentada as avl
+from codigo import bst_ingenua as bst
 
 
 def percentile(samples: array, percentage: float) -> int:

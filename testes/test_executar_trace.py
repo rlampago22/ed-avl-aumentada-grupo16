@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from executar_trace import execute_trace
+from codigo.executar_trace import execute_trace
 
 
 class TraceExecutionTests(unittest.TestCase):

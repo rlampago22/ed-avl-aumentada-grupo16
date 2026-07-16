@@ -270,7 +270,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Valida resultados e gera os quatro graficos finais."
     )
-    parser.add_argument("--results", type=Path, default=Path("resultados.csv"))
+    parser.add_argument(
+        "--results",
+        type=Path,
+        default=Path("resultados/resultados.csv"),
+    )
     parser.add_argument("--output", type=Path, default=Path("graficos"))
     args = parser.parse_args()
 
@@ -290,4 +294,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
