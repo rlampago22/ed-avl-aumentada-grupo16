@@ -23,7 +23,7 @@ sem balanceamento usada como linha de base experimental.
 - `codigo/`: AVL, BST, gerador, executor e ferramentas de experimento.
 - `testes/`: testes unitarios, de invariantes e diferenciais.
 - `resultados/`: CSV final com as 66 execucoes da matriz experimental.
-- `graficos/`: quatro figuras do relatorio e o script que as gera.
+- `graficos/`: cinco figuras do relatorio e o script que as gera.
 
 O conjunto OSM, os traces e os resultados intermediarios ficam apenas na
 maquina local por causa do tamanho. O CSV final e os graficos sao versionados.
@@ -139,5 +139,5 @@ A matriz completa mede cinco escalas entre `10^2` e `10^6`, os thetas
 `0.0`, `0.6`, `0.99` e `1.2`, as ordens `shuffle` e `sorted`, e compara AVL
 com BST. Os resultados incluem insercao, remocao, busca, rank, select,
 range, altura final e quantidade de rotacoes. O ultimo comando valida as 66
-execucoes esperadas e produz quatro graficos a partir da mediana das tres
+execucoes esperadas e produz cinco graficos a partir da mediana das tres
 repeticoes de cada cenario.
