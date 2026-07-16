@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import math
 import os
 import re
 import tempfile
@@ -137,32 +138,143 @@ def plot_scale_heights(summary: dict, output: Path) -> None:
     save_figure(figure, output / "escala_altura.png")
 
 
+def _logn_reference(sizes: tuple, anchor_value: float, anchor_size: int) -> list[float]:
+    """Retorna valores de uma curva c*log2(n) ancorada em anchor_size -> anchor_value."""
+    c = anchor_value / math.log2(anchor_size)
+    return [c * math.log2(s) for s in sizes]
+
+
+def plot_scale_latency(summary: dict, output: Path) -> None:
+    """Grafico de I/D/S p50 vs n para AVL e BST com curva teorica O(log n)."""
+    sizes = (100, 1_000, 10_000, 100_000, 1_000_000)
+    operations = ("I", "D", "S")
+    titles = {"I": "insert(k)", "D": "delete(k)", "S": "search(k)"}
+    figure, axes = plt.subplots(1, 3, figsize=(13.2, 4.5), sharex=True)
+    for axis, operation in zip(axes, operations):
+        avl_values = [
+            summary[(f"scale_n{size}", "avl", operation)]["p50_us"]
+            for size in sizes
+        ]
+        bst_values = [
+            summary[(f"scale_n{size}", "bst", operation)]["p50_us"]
+            for size in sizes
+        ]
+        axis.plot(
+            sizes,
+            avl_values,
+            color=COLORS["avl"],
+            marker=MARKERS["avl"],
+            linewidth=2,
+            markersize=5,
+            label="AVL",
+        )
+        axis.plot(
+            sizes,
+            bst_values,
+            color=COLORS["bst"],
+            marker=MARKERS["bst"],
+            linewidth=2,
+            markersize=5,
+            label="BST",
+        )
+        # Curva teorica O(log n) ancorada no ponto AVL em n=100
+        ref = _logn_reference(sizes, avl_values[0], 100)
+        axis.plot(
+            sizes,
+            ref,
+            color="#888888",
+            linestyle="--",
+            linewidth=1.5,
+            label="O(log n)",
+        )
+        # Detecta e anota o ponto de cruzamento AVL < BST
+        for i in range(len(sizes) - 1):
+            if avl_values[i] >= bst_values[i] and avl_values[i + 1] < bst_values[i + 1]:
+                cross_n = sizes[i + 1]
+                axis.axvline(cross_n, color="#999", linestyle=":", linewidth=1)
+                axis.annotate(
+                    f"cruzamento\n≈n={cross_n:,}",
+                    xy=(cross_n, (avl_values[i + 1] + bst_values[i + 1]) / 2),
+                    xytext=(cross_n * 1.5, avl_values[i + 1] * 1.5),
+                    fontsize=7,
+                    color="#555",
+                    arrowprops=dict(arrowstyle="->", color="#888", lw=0.8),
+                )
+        axis.set_xscale("log")
+        axis.set_yscale("log")
+        axis.set_title(titles[operation])
+        axis.set_xlabel("n")
+        axis.set_xticks(sizes, ("100", "1 mil", "10 mil", "100 mil", "1 M"), fontsize=7)
+    axes[0].set_ylabel("p50 (microssegundos, escala log)")
+    axes[0].legend(fontsize=8)
+    figure.suptitle(
+        "Escalabilidade das operações básicas — teoria × prática", fontsize=14
+    )
+    figure.tight_layout()
+    save_figure(figure, output / "escala_operacoes_basicas.png")
+
+
 def plot_scale_queries(summary: dict, output: Path) -> None:
     sizes = (100, 1_000, 10_000, 100_000, 1_000_000)
     operations = ("RANK", "SELECT", "RANGE")
     titles = {"RANK": "rank(k)", "SELECT": "select(i)", "RANGE": "range_agg(a, b)"}
     figure, axes = plt.subplots(1, 3, figsize=(13.2, 4.5), sharex=True)
     for axis, operation in zip(axes, operations):
-        for structure in ("avl", "bst"):
-            values = [
-                summary[(f"scale_n{size}", structure, operation)]["p50_us"]
-                for size in sizes
-            ]
-            axis.plot(
-                sizes,
-                values,
-                color=COLORS[structure],
-                marker=MARKERS[structure],
-                linewidth=2,
-                markersize=5,
-                label=structure.upper(),
-            )
+        avl_values = [
+            summary[(f"scale_n{size}", "avl", operation)]["p50_us"]
+            for size in sizes
+        ]
+        bst_values = [
+            summary[(f"scale_n{size}", "bst", operation)]["p50_us"]
+            for size in sizes
+        ]
+        axis.plot(
+            sizes,
+            avl_values,
+            color=COLORS["avl"],
+            marker=MARKERS["avl"],
+            linewidth=2,
+            markersize=5,
+            label="AVL",
+        )
+        axis.plot(
+            sizes,
+            bst_values,
+            color=COLORS["bst"],
+            marker=MARKERS["bst"],
+            linewidth=2,
+            markersize=5,
+            label="BST",
+        )
+        # Curva teorica O(log n) ancorada no ponto AVL em n=100
+        ref = _logn_reference(sizes, avl_values[0], 100)
+        axis.plot(
+            sizes,
+            ref,
+            color="#888888",
+            linestyle="--",
+            linewidth=1.5,
+            label="O(log n)",
+        )
+        # Detecta e anota o ponto de cruzamento AVL < BST
+        for i in range(len(sizes) - 1):
+            if avl_values[i] >= bst_values[i] and avl_values[i + 1] < bst_values[i + 1]:
+                cross_n = sizes[i + 1]
+                axis.axvline(cross_n, color="#999", linestyle=":", linewidth=1)
+                axis.annotate(
+                    f"cruzamento\n≈n={cross_n:,}",
+                    xy=(cross_n, (avl_values[i + 1] + bst_values[i + 1]) / 2),
+                    xytext=(cross_n * 1.5, avl_values[i + 1] * 1.5),
+                    fontsize=7,
+                    color="#555",
+                    arrowprops=dict(arrowstyle="->", color="#888", lw=0.8),
+                )
         axis.set_xscale("log")
         axis.set_yscale("log")
         axis.set_title(titles[operation])
         axis.set_xlabel("n")
     axes[0].set_ylabel("p50 (microssegundos, escala log)")
-    axes[0].legend()
+    axes[0].legend(fontsize=8)
     figure.suptitle("Escalabilidade das consultas aumentadas", fontsize=14)
     figure.tight_layout()
     save_figure(figure, output / "escala_consultas_aumentadas.png")
@@ -256,10 +368,15 @@ def plot_order(summary: dict, output: Path) -> None:
                 color=COLORS[structure],
                 label=structure.upper(),
             )
-        axis.set_yscale("log")
+        # Painel de altura usa escala linear para expor a cadeia BST sorted (h=n)
+        if title == "Altura final":
+            axis.set_yscale("linear")
+            axis.set_ylabel(f"{unit}")
+        else:
+            axis.set_yscale("log")
+            axis.set_ylabel(f"{unit} (escala log)")
         axis.set_xticks(x_positions, ("shuffle", "sorted"))
         axis.set_title(title)
-        axis.set_ylabel(f"{unit} (escala log)")
     axes[0].legend()
     figure.suptitle("Efeito da ordem de inserção sobre AVL e BST", fontsize=14)
     figure.tight_layout()
@@ -268,7 +385,7 @@ def plot_order(summary: dict, output: Path) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Valida resultados e gera os quatro graficos finais."
+        description="Valida resultados e gera os cinco graficos finais."
     )
     parser.add_argument(
         "--results",
@@ -285,6 +402,7 @@ def main() -> int:
     setup_style()
 
     plot_scale_heights(summary, args.output)
+    plot_scale_latency(summary, args.output)
     plot_scale_queries(summary, args.output)
     plot_theta(summary, args.output)
     plot_order(summary, args.output)

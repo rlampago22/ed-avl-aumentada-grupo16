@@ -7,3 +7,5 @@ workloads/
 *.out
 cenarios.csv
 resultados_*.csv
+*venv
+*claude
