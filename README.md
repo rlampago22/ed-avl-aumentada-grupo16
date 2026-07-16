@@ -26,6 +26,7 @@ sem balanceamento usada como linha de base experimental.
 - `gen_workload.py`: gerador e oraculo fornecido pelo professor.
 - `benchmark.py`: mede media, p50 e p99 por operacao.
 - `rodar_experimentos.py`: executa os cenarios reproduziveis do grupo 16.
+- `gerar_graficos.py`: valida o CSV final e gera as quatro figuras do relatorio.
 - `test_*.py`: testes unitarios, de invariantes e diferenciais.
 
 O conjunto OSM, os traces e os resultados intermediarios sao gerados
@@ -147,9 +148,14 @@ Matriz completa:
 ```powershell
 python rodar_experimentos.py --suite full --repetitions 3 `
   --results resultados.csv --reset-results
+
+python gerar_graficos.py --results resultados.csv --output graficos
 ```
 
 A matriz completa mede cinco escalas entre `10^2` e `10^6`, os thetas
 `0.0`, `0.6`, `0.99` e `1.2`, as ordens `shuffle` e `sorted`, e compara AVL
 com BST. Os resultados incluem insercao, remocao, busca, rank, select,
-range, altura final e quantidade de rotacoes.
+range, altura final e quantidade de rotacoes. O ultimo comando valida as 66
+execucoes esperadas e produz quatro graficos a partir da mediana das tres
+repeticoes de cada cenario.
+
